@@ -108,13 +108,8 @@ server <- function(input, output) {
 
 }
 
-#how to filter by different things?
-#without making new output tables for each type of filter?
-#### HOW TO FILTER BY LIKE YEAR AAANNNDDD STATE AT THE SAME TIME???
 #how to make the table go back to normal after u clear the filters??
 #how to clear all filters at once?
-# Year input gets warning when you search too many years 
-#Warning in Year == input$years : longer object length is not a multiple of shorter object length
 
 # Run the application 
 shinyApp(ui = ui, server = server)

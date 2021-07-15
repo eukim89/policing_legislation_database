@@ -3,22 +3,22 @@
     "path": "~/police_legislation_database/police_legislation_db.R",
     "project_path": "police_legislation_db.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "3537991257",
     "contents": "",
-    "dirty": true,
+    "dirty": false,
     "created": 1626039479803.0,
     "source_on_save": false,
     "relative_order": 1,
     "properties": {
-        "cursorPosition": "120,0",
-        "scrollLine": "0"
+        "cursorPosition": "112,0",
+        "scrollLine": "99"
     },
     "folds": "",
-    "lastKnownWriteTime": 1626361565,
+    "lastKnownWriteTime": 1626387171,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1626366719202,
+    "last_content_update": 1626387171007,
     "read_only": false,
     "read_only_alternatives": []
 }
