@@ -8,7 +8,6 @@ policing_data <- read.xlsx("Completed Policing Legislation-4.xlsx", detectDates 
 policing_data <- policing_data %>% 
     mutate(Year = substr(policing_data$Date, 1, 4)) %>% 
     mutate(Year = if_else(grepl("\\D", Year), "0", Year))
-#### consider cleaning up column names
 
 policing_data$Year <- as.numeric(policing_data$Year)
 #### NEED TO FIX YEARS
@@ -21,6 +20,10 @@ policing_data <- policing_data %>%
     mutate(`Status.(failed/enacted/pending)` = if_else(str_detect(`Status.(failed/enacted/pending)`, "(?i)enacted") == TRUE, "enacted", `Status.(failed/enacted/pending)`)) %>% 
     mutate(`Status.(failed/enacted/pending)` = if_else(str_detect(`Status.(failed/enacted/pending)`, "(?i)pending") == TRUE, "pending", `Status.(failed/enacted/pending)`)) %>% 
     mutate(`Status.(failed/enacted/pending)` = if_else(str_detect(`Status.(failed/enacted/pending)`, "(?i)failed") == TRUE, "failed", `Status.(failed/enacted/pending)`))
+
+# cleaning up column names
+policing_data <- rename(policing_data, "LawNum" = `Law.Number.(for.title.of.pdf)`,
+                        "Status" = `Status.(failed/enacted/pending)`)
 
 ui <- fluidPage(
     dashboardHeader(title = "Policing Legislation Registry"),
