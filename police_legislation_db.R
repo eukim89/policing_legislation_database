@@ -8,12 +8,19 @@ policing_data <- read.xlsx("Completed Policing Legislation-4.xlsx", detectDates 
 policing_data <- policing_data %>% 
     mutate(Year = substr(policing_data$Date, 1, 4)) %>% 
     mutate(Year = if_else(grepl("\\D", Year), "0", Year))
+#### consider cleaning up column names
 
 policing_data$Year <- as.numeric(policing_data$Year)
 #### NEED TO FIX YEARS
 #### NEED TO FIX STATES (looking a lot like arfwm clinics)
     # if it has a "-", contains "City", or has an extra space, conform to state name
 #db_years <- as.vector(unique(policing_data$Year))
+
+# Cleaning Status column (NOT FINAL; adjust later)
+policing_data <- policing_data %>% 
+    mutate(`Status.(failed/enacted/pending)` = if_else(str_detect(`Status.(failed/enacted/pending)`, "(?i)enacted") == TRUE, "enacted", `Status.(failed/enacted/pending)`)) %>% 
+    mutate(`Status.(failed/enacted/pending)` = if_else(str_detect(`Status.(failed/enacted/pending)`, "(?i)pending") == TRUE, "pending", `Status.(failed/enacted/pending)`)) %>% 
+    mutate(`Status.(failed/enacted/pending)` = if_else(str_detect(`Status.(failed/enacted/pending)`, "(?i)failed") == TRUE, "failed", `Status.(failed/enacted/pending)`))
 
 ui <- fluidPage(
     dashboardHeader(title = "Policing Legislation Registry"),
@@ -27,6 +34,13 @@ ui <- fluidPage(
                          #multiple = TRUE,
                          selected = "All"
                          ),
+                     selectInput(
+                         inputId = "status",
+                         label = "Status (failed/enacted/pending):",
+                         choices = c("All", unique(policing_data$`Status.(failed/enacted/pending)`)),
+                         #multiple = TRUE,
+                         selected = "All"
+                     ),
                      
                      ####fix slider after cleaning years
                      sliderInput(
@@ -63,8 +77,17 @@ server <- function(input, output) {
         }
     })
     
+    filtered_status <- reactive({
+        if(input$status == "All"){
+            policing_data
+        } else {
+            policing_data %>% 
+                filter(`Status.(failed/enacted/pending)` == input$status)
+        }
+    })
+    
     filtered_year <- reactive({
-        filtered_state() %>% 
+        filtered_status() %>% 
             filter(Year >= input$year[1] & Year <= input$year[2])
     })
     
