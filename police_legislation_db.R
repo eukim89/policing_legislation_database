@@ -3,6 +3,7 @@ library(shinydashboard)
 library(tidyverse)
 library(openxlsx)
 library(DT)
+library(shinyWidgets)
 
 policing_data <- read.xlsx("Completed Policing Legislation-4.xlsx", detectDates = TRUE)
 policing_data <- policing_data %>% 
@@ -26,26 +27,21 @@ policing_data <- rename(policing_data, "LawNum" = `Law.Number.(for.title.of.pdf)
                         "Status" = `Status.(failed/enacted/pending)`)
 
 ui <- fluidPage(
-    dashboardHeader(title = "Policing Legislation Registry"),
+    setBackgroundColor(color = "PaleGoldenRod"),
+    h2("Policing Legislation Registry"),
+    #dashboardHeader(title = "Policing Legislation Registry"),
     sidebarLayout(
-        sidebarPanel(width = 2,
-                     h5("Narrow results by:"),
-                     selectInput(
-                         inputId = "state",
-                         label = "State:",
-                         choices = c("All", unique(policing_data$State)),
-                         #multiple = TRUE,
-                         selected = "All",
-                         # btnReset = TRUE,
-                         # resetValue = "All"
-                         ),
-                     selectInput(
-                         inputId = "status",
-                         label = "Status (failed/enacted/pending):",
-                         choices = c("All", unique(policing_data$`Status.(failed/enacted/pending)`)),
-                         #multiple = TRUE,
-                         selected = "All"
-                     ),
+        sidebarPanel(h5("Narrow results by:"),
+                     uiOutput('resetable_state'),
+
+                     #br(),
+                     actionButton("reset_state", "Reset state filters"),
+                     br(),
+                     
+                     uiOutput('resetable_status'),
+                     
+                     actionButton("reset_status", "Reset status filters"),
+                     
                      
                      ####fix slider after cleaning years
                      sliderInput(
@@ -58,7 +54,6 @@ ui <- fluidPage(
                      actionButton('select', 'Select')
         ),
         mainPanel(
-            width = 10,
             # fluidRow(
             #     infoBoxOutput("rowcount")
             # ),
@@ -84,10 +79,10 @@ server <- function(input, output) {
     
     filtered_status <- reactive({
         if(input$status == "All"){
-            policing_data
+            filtered_state()
         } else {
-            policing_data %>% 
-                filter(`Status.(failed/enacted/pending)` == input$status)
+            filtered_state() %>% 
+                filter(Status == input$status)
         }
     })
     
@@ -113,26 +108,31 @@ server <- function(input, output) {
         )
     })
     
-    # year_filter_data <- reactive({
-    #     subset(policing_data, Year %in% input$years)
-    # })
-    # creating a reactive expression so observeEvent can observe multiple inputs
-    # toListen <- reactive({
-    #     list(input$years,input$states)
-    # })
-    # 
-    # observeEvent(toListen(),{
-    #     policing_data_filter <- policing_data %>% 
-    #         filter(Year == input$years && State == input$State)
-    #     output$policing_table <- renderDataTable({policing_data_filter})
-    #     
-    # }, ignoreNULL = TRUE, ignoreInit = TRUE)
-    
-    # observeEvent(input$years,{
-    #     policing_data_year <- policing_data %>% 
-    #         filter(Year == input$years)
-    #     output$policing_table <- renderDataTable({policing_data_year})
-    # })
+    output$resetable_state <- renderUI({
+        times <- input$reset_state
+        div(id = letters[(times %% length(letters))+1],
+            selectInput(
+                inputId = "state",
+                label = "State:",
+                choices = c("All", unique(policing_data$State)),
+                #multiple = TRUE,
+                selected = "All"
+            )
+        )
+
+    })
+    output$resetable_status <- renderUI({
+        times <- input$reset_status
+        div(id = letters[(times %% length(letters))+1],
+            selectInput(
+                inputId = "status",
+                label = "Status (failed/enacted/pending):",
+                choices = c("All", unique(policing_data$Status)),
+                #multiple = TRUE,
+                selected = "All"
+            )
+        )
+    })
 
 }
 
