@@ -13,7 +13,7 @@ policing_data <- policing_data %>%
 policing_data$Year <- as.numeric(policing_data$Year)
 #### NEED TO FIX YEARS
 #### NEED TO FIX STATES (looking a lot like arfwm clinics)
-    # if it has a "-", contains "City", or has an extra space, conform to state name
+
 #db_years <- as.vector(unique(policing_data$Year))
 
 # Cleaning Status column (NOT FINAL; adjust later)
@@ -29,13 +29,12 @@ policing_data <- rename(policing_data, "LawNum" = `Law.Number.(for.title.of.pdf)
 ui <- fluidPage(
     setBackgroundColor(color = "PaleGoldenRod"),
     h2("Policing Legislation Registry"),
-    #dashboardHeader(title = "Policing Legislation Registry"),
     sidebarLayout(
         sidebarPanel(h5("Narrow results by:"),
                      uiOutput('resetable_state'),
 
-                     #br(),
                      actionButton("reset_state", "Reset state filters"),
+                     br(),
                      br(),
                      
                      uiOutput('resetable_status'),
@@ -98,15 +97,16 @@ server <- function(input, output) {
     output$policing_table <- renderDataTable({
         datatable(
             data = final_filtered(), rownames = FALSE
+            #data = filtered_year(), rownames = FALSE
         )
     })
     
-    output$rowcount <- renderInfoBox({
-        infoBox(
-            "Number of total observations:",
-            as.character(nrow(policing_data))
-        )
-    })
+    # output$rowcount <- renderInfoBox({
+    #     infoBox(
+    #         "Number of total observations:",
+    #         as.character(nrow(policing_data))
+    #     )
+    # })
     
     output$resetable_state <- renderUI({
         times <- input$reset_state
