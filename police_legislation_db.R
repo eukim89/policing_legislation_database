@@ -35,7 +35,9 @@ ui <- fluidPage(
                          label = "State:",
                          choices = c("All", unique(policing_data$State)),
                          #multiple = TRUE,
-                         selected = "All"
+                         selected = "All",
+                         # btnReset = TRUE,
+                         # resetValue = "All"
                          ),
                      selectInput(
                          inputId = "status",
