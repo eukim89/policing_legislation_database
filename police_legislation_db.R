@@ -59,12 +59,23 @@ ui <- fluidPage(
                 column(width = 8,
                        box(dataTableOutput("policing_table"), width = NULL)
                 )
+            ),
+            fluidRow(
+                box(plotOutput("policing_legislation_plot"))
             )
         )
     )
 )
 
 server <- function(input, output) {
+    
+    output$policing_legislation_plot <- renderPlot(
+        policing_data %>% 
+            filter(Year %in% c(2021, 2020, 2019)) %>% 
+            ggplot(mapping = aes(x = Year)) +
+            geom_bar() +
+            labs(title = "Legislation by Year")
+    )
     
     filtered_state <- reactive({
         if(input$state == "All"){
@@ -133,6 +144,8 @@ server <- function(input, output) {
     })
 }
 #how to clear all filters at once?
+#what kind of visuals does professor Garrett want? (mentioned in email from a while back)
+#"graphics for report on this legislation"
 
 # Run the application 
 shinyApp(ui = ui, server = server)
