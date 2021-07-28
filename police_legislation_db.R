@@ -26,7 +26,6 @@ policing_data <- policing_data %>%
     mutate(Status = if_else(str_detect(Status, "(?i)pending") == TRUE, "pending", Status)) %>% 
     mutate(Status = if_else(str_detect(Status, "(?i)failed") == TRUE, "failed", Status))
 
-
 ui <- fluidPage(
     setBackgroundColor(color = "PaleGoldenRod"),
     h2("Policing Legislation Registry"),
@@ -41,7 +40,6 @@ ui <- fluidPage(
                      uiOutput('resetable_status'),
                      
                      actionButton("reset_status", "Reset status filters"),
-                     
                      
                      ####fix slider after cleaning years
                      sliderInput(
@@ -120,7 +118,6 @@ server <- function(input, output) {
                 selected = "All"
             )
         )
-
     })
     output$resetable_status <- renderUI({
         times <- input$reset_status
@@ -134,10 +131,7 @@ server <- function(input, output) {
             )
         )
     })
-
 }
-
-#how to make the table go back to normal after u clear the filters??
 #how to clear all filters at once?
 
 # Run the application 
