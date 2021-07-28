@@ -16,15 +16,16 @@ policing_data$Year <- as.numeric(policing_data$Year)
 
 #db_years <- as.vector(unique(policing_data$Year))
 
-# Cleaning Status column (NOT FINAL; adjust later)
-policing_data <- policing_data %>% 
-    mutate(`Status.(failed/enacted/pending)` = if_else(str_detect(`Status.(failed/enacted/pending)`, "(?i)enacted") == TRUE, "enacted", `Status.(failed/enacted/pending)`)) %>% 
-    mutate(`Status.(failed/enacted/pending)` = if_else(str_detect(`Status.(failed/enacted/pending)`, "(?i)pending") == TRUE, "pending", `Status.(failed/enacted/pending)`)) %>% 
-    mutate(`Status.(failed/enacted/pending)` = if_else(str_detect(`Status.(failed/enacted/pending)`, "(?i)failed") == TRUE, "failed", `Status.(failed/enacted/pending)`))
-
 # cleaning up column names
 policing_data <- rename(policing_data, "LawNum" = `Law.Number.(for.title.of.pdf)`,
                         "Status" = `Status.(failed/enacted/pending)`)
+
+# Cleaning Status column (NOT FINAL; adjust later)
+policing_data <- policing_data %>% 
+    mutate(Status = if_else(str_detect(Status, "(?i)enacted") == TRUE, "enacted", Status)) %>% 
+    mutate(Status = if_else(str_detect(Status, "(?i)pending") == TRUE, "pending", Status)) %>% 
+    mutate(Status = if_else(str_detect(Status, "(?i)failed") == TRUE, "failed", Status))
+
 
 ui <- fluidPage(
     setBackgroundColor(color = "PaleGoldenRod"),
@@ -49,8 +50,8 @@ ui <- fluidPage(
                          sep = "",
                          value = c(2020, 2021)
                      ),
-                     br(),
-                     actionButton('select', 'Select')
+                     # br(),
+                     # actionButton('select', 'Select')
         ),
         mainPanel(
             # fluidRow(
@@ -96,8 +97,8 @@ server <- function(input, output) {
     
     output$policing_table <- renderDataTable({
         datatable(
-            data = final_filtered(), rownames = FALSE
-            #data = filtered_year(), rownames = FALSE
+            #data = final_filtered(), rownames = FALSE
+            data = filtered_year(), rownames = FALSE
         )
     })
     
