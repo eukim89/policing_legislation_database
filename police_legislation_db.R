@@ -66,9 +66,11 @@ ui <- fluidPage(
                      ####fix slider after cleaning years
                      sliderInput(
                          inputId = "year",
-                         label = "Year", min = min(Year), max = max(Year),
+                         label = "Year",
+                         min = min(policing_data$Year, na.rm = T),
+                         max = max(policing_data$Year, na.rm = T),
                          sep = "",
-                         value = c(2020, 2021)
+                         value = c(min(policing_data$Year, na.rm = T), 2021)
                      ),
                      # br(),
                      # actionButton('select', 'Select')
