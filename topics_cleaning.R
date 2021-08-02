@@ -8,6 +8,8 @@ library(openxlsx)
 ### Reading data ###
 unique_terms <- read.xlsx("unique_terms.xlsx") %>% 
   select(-action)
+# Chose to make a separate topics_data data frame to just have a database of topics
+#and leave the original data the same
 
 ### Cleaning unique topics list ###
 Unique_terms <- unique_terms %>% 
