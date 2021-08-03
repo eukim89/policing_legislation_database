@@ -8,11 +8,11 @@ library(openxlsx)
 ### Reading data ###
 unique_terms <- read.xlsx("unique_terms.xlsx") %>% 
   select(-action)
-# Chose to make a separate topics_data data frame to just have a database of topics
+# Chose to have a separate topics_data data frame to just have a database of topics
 #and leave the original data the same
 
 ### Cleaning unique topics list ###
-Unique_terms <- unique_terms %>% 
+unique_terms <- unique_terms %>% 
   mutate(topic = if_else(str_detect(topic, "(?i)bail"), "bail", topic),
          topic = if_else(str_detect(topic, "(?i)arrest"), "arrest", topic),
          topic = if_else(str_detect(topic, "(?i)body cam"), "body cameras", topic),
@@ -56,8 +56,8 @@ Unique_terms <- unique_terms %>%
   # updating/consolidating count column
 
 ### Cleaning policing_data typos?
-policing_data$Topic <- 
-  str_replace(policing_data$Topic, "\\bbody cam\\b", "body cameras") 
-  str_replace(policing_data$Topic, "\\bliablity\\b", "liability")
+# policing_data$Topic <- 
+#   str_replace(policing_data$Topic, "\\bbody cam\\b", "body cameras") 
+#   str_replace(policing_data$Topic, "\\bliablity\\b", "liability")
   
-write.csv(topics_data, "unique_terms", row.names = FALSE)
+write.csv(unique_terms, "topics_data.csv", row.names = FALSE)

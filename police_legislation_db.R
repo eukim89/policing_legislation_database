@@ -6,6 +6,7 @@ library(DT)
 library(shinyWidgets)
 
 policing_data <- read.xlsx("Completed Policing Legislation-4SB.xlsx", detectDates = TRUE)
+topics_data <- read.csv("topics_data.csv")
 
 # Creating Year column (taking last 4 characters of Date column)
 policing_data <- policing_data %>% 
@@ -81,8 +82,6 @@ ui <- fluidPage(
                          sep = "",
                          value = c(min(policing_data$Year, na.rm = T), 2021)
                      ),
-                     # br(),
-                     # actionButton('select', 'Select')
         ),
         mainPanel(
             fluidRow(
@@ -97,7 +96,7 @@ ui <- fluidPage(
     )
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
     
     # output$policing_legislation_plot <- renderPlot(
     #     policing_data %>% 
@@ -148,13 +147,8 @@ server <- function(input, output) {
             filter(Year >= input$year[1] & Year <= input$year[2])
     })
     
-    final_filtered <- eventReactive(input$select, {
-        filtered_year()
-    })
-    
     output$policing_table <- renderDataTable({
         datatable(
-            #data = final_filtered(), rownames = FALSE
             data = filtered_year(), rownames = FALSE
         )
     })
@@ -172,14 +166,30 @@ server <- function(input, output) {
         )
     })
     
+    ### How to make Local filter auto-update choices depending on what state is selected?
+    # local_choices <- reactiveValues()
+    # 
+    # observe({
+    #     if(input$state == "All"){
+    #         local_choices$local <- unique(policing_data$Local)
+    #     } else {
+    #         tmp <- policing_data %>% 
+    #             filter(State == input$State) 
+    #         local_choices$local <- unique(tmp$Local[!is.na(tmp$Local)])
+    #     }
+    #     updateSelectInput(session, "local", choices = local_choice$local)
+    # })
+    
     output$resetable_local <- renderUI({
+        # lchoices <- local_choices$local
         times <- input$reset_local
         div(id = letters[(times %% length(letters))+1],
             selectInput(
                 inputId = "local",
                 label = "City/county:",
                 #choices = c(unique(filtered_state()$Local))
-                choices = c("All",  unique(policing_data$Local)),
+                choices = c("All", unique(policing_data$Local)),
+                #choices = "",
                 selected = "All"
             )
         )
