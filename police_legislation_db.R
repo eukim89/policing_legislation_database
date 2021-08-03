@@ -8,18 +8,23 @@ library(shinyWidgets)
 policing_data <- read.xlsx("Completed Policing Legislation-4SB.xlsx", detectDates = TRUE)
 topics_data <- read.csv("topics_data.csv")
 
-# Creating Year column (taking last 4 characters of Date column)
-policing_data <- policing_data %>% 
-    mutate(Year = substr(policing_data$Date, 1, 4)) %>% 
-    mutate(Year = if_else(grepl("\\D", Year), "0", Year))
-
-# Changing Year column class to numeric
-policing_data$Year <- as.numeric(policing_data$Year)
-
 # cleaning up column names
 policing_data <- rename(policing_data, "LawNum" = `Law.Number.(for.title.of.pdf)`,
                         "Status" = `Status.(failed/enacted/pending)`,
                         "Local" = Local.Level)
+
+# Creating Year column (taking last 4 characters of Date column)
+# For observations with typo in Date column, used first 4 characters of law number
+policing_data <- policing_data %>% 
+    mutate(Year = substr(policing_data$Date, 1, 4)) %>% 
+    mutate(Year = if_else(Year > "2100" | Year < "2017", substr(policing_data$LawNum, 1, 4), Year))
+
+# Fixing typo in Year column
+policing_data <- policing_data %>% 
+    mutate(Year = if_else(LawNum == "WI 21 2020", "2020", Year))
+
+# Changing Year column class to numeric
+policing_data$Year <- as.numeric(policing_data$Year)
 
 # Cleaning Status column
 policing_data <- policing_data %>% 
@@ -210,12 +215,12 @@ server <- function(input, output, session) {
     })
     
     output$resetable_topic <- renderUI({
-        times <- input$reste_topic
+        times <- input$reset_topic
         div(id = letters[(times %% length(letters))+1],
             selectInput(
                 inputId = "topic",
                 label = "Topic of bill:",
-                choices = c("All", unique(topics_data$topic)),
+                choices = c("All", as.character(unique(topics_data$topic))),
                 selected = "All"
             )
         )
