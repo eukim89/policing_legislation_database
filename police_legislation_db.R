@@ -14,16 +14,17 @@ policing_data <- rename(policing_data, "LawNum" = `Law.Number.(for.title.of.pdf)
                         "Local" = Local.Level)
 
 # Creating Year column (taking last 4 characters of Date column)
-# For observations with typo in Date column, used first 4 characters of law number
+# For observations with typo in Date column/missing Date, used first 4 characters of law number
 policing_data <- policing_data %>% 
     mutate(Year = substr(policing_data$Date, 1, 4)) %>% 
-    mutate(Year = if_else(Year > "2100" | Year < "2017", substr(policing_data$LawNum, 1, 4), Year))
+    mutate(Year = if_else(Year > "2100" | Year < "2017" | is.na(Year), substr(policing_data$LawNum, 1, 4), Year))
 
 # Fixing typo in Year column
 policing_data <- policing_data %>% 
     mutate(Year = if_else(LawNum == "WI 21 2020", "2020", Year))
 
 # Changing Year column class to numeric
+#NAs introduced by coercion here
 policing_data$Year <- as.numeric(policing_data$Year)
 
 # Cleaning Status column
@@ -50,14 +51,17 @@ policing_data$Local <- trimws(policing_data$Local)
 
 policing_data$Topic <- 
     str_replace(policing_data$Topic, "\\bbody cam\\b", "body cameras")
+
+# Changing order of columns (making Notes column last, moving Year next to Date)
+policing_data <- policing_data %>% 
+    select(State:Title, Year, Date:Notes)
     
 ui <- fluidPage(
     setBackgroundColor(color = "LemonChiffon"),
     h2("Policing Legislation Registry"),
     sidebarLayout(
-        sidebarPanel(h5("Narrow results by:"),
+        sidebarPanel(h4("Narrow results by:"),
                      uiOutput('resetable_state'),
-
                      actionButton("reset_state", "Reset state filter"),
                      br(),
                      br(),
@@ -68,13 +72,11 @@ ui <- fluidPage(
                      br(),
                      
                      uiOutput('resetable_status'),
-                     
                      actionButton("reset_status", "Reset status filter"),
                      br(),
                      br(),
                      
                      uiOutput('resetable_topic'),
-                     
                      actionButton("reset_topic", "Reset topic filter"),
                      br(),
                      br(),
@@ -91,26 +93,16 @@ ui <- fluidPage(
         mainPanel(
             fluidRow(
                 column(width = 8,
-                       box(dataTableOutput("policing_table"), width = NULL)
+                       box(div(DT::dataTableOutput("policing_table"),
+                               style = "width: 75%"), width = NULL)
                 )
-            ),
-            fluidRow(
-                box(plotOutput("policing_legislation_plot"))
             )
         )
     )
 )
 
 server <- function(input, output, session) {
-    
-    # output$policing_legislation_plot <- renderPlot(
-    #     policing_data %>% 
-    #         filter(Year %in% c(2021, 2020, 2019)) %>% 
-    #         ggplot(mapping = aes(x = Year)) +
-    #         geom_bar() +
-    #         labs(title = "Legislation by Year")
-    # )
-    
+
     filtered_state <- reactive({
         if(input$state == "All"){
             policing_data
@@ -152,8 +144,12 @@ server <- function(input, output, session) {
             filter(Year >= input$year[1] & Year <= input$year[2])
     })
     
-    output$policing_table <- renderDataTable({
+    output$policing_table <- DT::renderDataTable({
         datatable(
+            # options = list(
+            #     scrollX=TRUE,
+            #     autoWidth = TRUE
+            # ),
             data = filtered_year(), rownames = FALSE
         )
     })
